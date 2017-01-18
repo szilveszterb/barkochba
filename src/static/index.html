@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Barkochba game</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">RTAD</a>
+            </div>
+          </div>
+        </nav>
+
+        <h1>Hello World</h1>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Text to speech</div>
+            <div class="panel-body">
+                Panel content
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Speech to text</div>
+            <div class="panel-body">
+                Panel content
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">Game engine</div>
+            <div class="panel-body">
+                <button id="io-start">Start</button>
+                <div>Question</div>
+                <div id="io-question"></div>
+                <div>answers</div>
+                <div id="io-answers"></div>
+                <input type="text" id="io-answer">
+                <button id="io-send-answer">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/game-engine.js"></script>
+    <script src="js/index.js"></script>
+</body>
+</html>
