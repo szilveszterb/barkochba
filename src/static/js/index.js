@@ -1,4 +1,5 @@
 
+const speaker = new Text2Speech();
 
 const akinator = new Akinator({
     onAsk(x) {
