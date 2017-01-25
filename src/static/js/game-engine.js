@@ -12,15 +12,21 @@
         const result = [];
         if (obj) {
             for (var key in obj) {
-                result.push(key, obj[key]);
+                result.push([key, obj[key]]);
             }
         }
         return result;
     }
 
+    function promised(fn) {
+        return new Promise(resolve => {
+            resolve(fn());
+        });
+    }
+
     class Akinator {
         constructor(callbacks) {
-            this.url = 'http://api-en4.akinator.com/ws/';
+            this.url = '/api/aki/';
             this.player = "Player";
             this.session = null;
             this.signature = null;
@@ -30,14 +36,14 @@
         }
 
         hello() {
-            return Promise.resolve().then(() => {
-                return fetch(this.url + 'new_session?partner=1&player=' + url.encode(this.player));
+            return promised(() => {
+                return fetch(this.url + 'ws/new_session?partner=1&player=' + url.encode(this.player));
             }).then(resp => {
                 return resp.json();
             }).then(resp => {
                 this.session = resp.parameters.identification.session;
                 this.signature = resp.parameters.identification.signature;
-                const question = this.extractQuestion(rs);
+                const question = this.extractQuestion(resp);
                 this.callbacks.onAsk(question);
             }).catch(e => {
                 this.callbacks.onError(e);
@@ -54,17 +60,19 @@
                 text: parameters.question
             };
             const answers = entries(parameters.answers)
-                .map(([id, option]) => ({ id, text: option.answer }));
-            const last = parameters.progression > 99.9999;
+                .map(([id, option]) => ({ id, text: option.answer }))
+            // Heuristics to end the game sometime
+            const last = parameters.progression > 100 - this.step / 4;
             return { question, answers, last };
         }
 
         sendAnswer(answerId) {
-            return Promise.resolve().then(() => {
-                return fetch(this.url + 'answer?'
+            return promised(() => {
+                const step = this.step++;
+                return fetch(this.url + 'ws/answer?'
                  + 'session=' + this.session
                  + '&signature=' + this.signature
-                 + '&step=' + this.step
+                 + '&step=' + step
                  + '&answer=' + answerId);
             }).then(resp => {
                 return resp.json();
@@ -78,12 +86,15 @@
             }).catch(e => {
                 this.callbacks.onError(e);
             });
-            this.step++;
+        }
+
+        _pictureUrl(character) {
+            return this.url + "photo0/" + character.element.picture_path;
         }
 
         getCharacters() {
-            return Promise.resolve().then(() => {
-                return fetch(this.url + 'list'
+            return promised(() => {
+                return fetch(this.url + 'ws/list'
                     + '?session=' + this.session
                     + '&signature=' + this.signature
                     + '&step=' + this.step
@@ -99,7 +110,7 @@
                         id: character.element.id,
                         name: character.element.name,
                         probability: character.element.proba,
-                        photo: character.element.picture_path
+                        photo: this._pictureUrl(character)
                     };
                 });
                 this.callbacks.onFound(characters);
