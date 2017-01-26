@@ -1,7 +1,7 @@
 (function() {
     class Speech2Text {
         constructor() {
-            this.recognition = null;
+            this._recognition = null;
             this.onResult = null;
 
             this._recognition = new webkitSpeechRecognition();
@@ -20,10 +20,10 @@
             }
         }
         start() {
-            this.recognition.start();
+            this._recognition.start();
         }
         stop() {
-            this.recognition.stop();
+            this._recognition.stop();
         }
     }
 

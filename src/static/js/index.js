@@ -1,49 +1,50 @@
+(function(){
+    var speaker = null, listener = null, akinator = null;
 
-                <button id="stt-start">Start listening</button>
-
-
-
-try {
-    const listener = new Speech2Text();
-} catch (e) {
-}
-
-const speaker = new Text2Speech();
-
-const akinator = new Akinator({
-    onAsk(x) {
-        document.getElementById("io-question").innerText = x.question.text;
-        const answersNode = document.getElementById("io-answers");
-        showAnswers(x.answers);
-
-        function clearChildren(node) {
-            var last;
-            while (last = node.lastChild) {
-                node.removeChild(last);
-            }
-        }
-        function showAnswers(answers) {
-            clearChildren(answersNode);
-            answers.forEach(ans => {
-                const node = document.createElement("li");
-                node.innerText = `${ans.text} (${ans.id})`;
-                answersNode.appendChild(node)
-                node.addEventListener("click", () => {
-                    akinator.sendAnswer(ans.id);
-                });
-            });
-        }
-    },
-    onFound(x) {
-        console.log("Akinator.onFound");
-        console.log(x);
-        console.log(JSON.stringify(x));
-        document.getElementById("io-question").innerText = x[0].name;
-        document.getElementById("io-answer-img").src = x[0].photo;
-    },
-    onError(e) {
+    try {
+        listener = new Speech2Text();
+    } catch (e) {
+        UI.showError("Your browser does not support WebSpeechRecognition API");
         console.error(e);
     }
-});
 
-akinator.hello();
+    try {
+        speaker = new Text2Speech();
+    } catch (e) {
+        UI.showError("Your browser does not support WebSpeechSynthesis API");
+        console.error(e);
+    }
+
+
+    UI.onStartListeningClicked = () => {
+        listener.start();
+    };
+
+    UI.onAnswerClicked = id => {
+        akinator.sendAnswer(id);
+    };
+
+    try {
+        akinator = new Akinator({
+            onAsk(x) {
+                UI.showQuestion(x.question.text);
+                UI.showAnswers(x.answers);
+            },
+            onFound(x) {
+                console.log("Akinator.onFound");
+                console.log(x);
+                console.log(JSON.stringify(x));
+                UI.showFoundAnswer(x[0].name, x[0].photo);
+            },
+            onError(e) {
+                UI.showError("An unknown error occured");
+                console.error(e);
+            }
+        });
+        akinator.hello();
+    } catch (e) {
+        UI.showError("Couldn't initialize akinator engine");
+        console.error(e);
+    }
+
+})();

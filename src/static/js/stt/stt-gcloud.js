@@ -207,7 +207,7 @@ cloud.Speech.prototype.startUserMedia = function(a) {
     a = this.audioContext_.createMediaStreamSource(a);
     this.rec_ = new window.Recorder(a,{
         numChannels: 1,
-        workerPath: "/js/recworker-bundle.js"
+        workerPath: "/js/stt/recorder.worker.js"
     });
     this.toggleRecord()
 }
