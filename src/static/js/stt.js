@@ -1,6 +1,6 @@
 var cloud = window.cloud || {};
 cloud.Speech = function() {
-    this.API_KEY = "1cd8597a9ed58a76ee318b611b5e73798863bd9d";
+    this.API_KEY = "AIzaSyCORpcZRn9td2EhpU8CeKtxBKKXkYy1Smg";
     this.SERVICE_URL = "https://speech.googleapis.com/v1beta1/speech:syncrecognize?key=" + this.API_KEY;
     this.MAX_RECORD_TIME = 3E4;
     this.TIMEOUT_AMOUNT = 6E4;
