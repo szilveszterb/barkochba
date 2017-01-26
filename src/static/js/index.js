@@ -1,4 +1,13 @@
 
+                <button id="stt-start">Start listening</button>
+
+
+
+try {
+    const listener = new Speech2Text();
+} catch (e) {
+}
+
 const speaker = new Text2Speech();
 
 const akinator = new Akinator({
