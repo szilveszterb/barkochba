@@ -1,10 +1,20 @@
 (function(){
     var speaker = null, listener = null, akinator = null;
 
+    function toArray(arrayLike) {
+        return Array.prototype.slice.call(arrayLike, 0);
+    }
     try {
         listener = new Speech2Text();
         listener.onResult = e => {
-            UI.showWebspeechResult(JSON.stringify(e.results));
+            const jsonResult = toArray(e.results).map(result => ({
+                alternatives: toArray(result).map(alt => ({
+                    transcript: alt.transcript,
+                    confidence: alt.confidence
+                })),
+                isFinal: e.results.isFinal
+            }));
+            UI.showWebspeechResult(JSON.stringify(jsonResult));
         };
     } catch (e) {
         UI.showError("Your browser does not support WebSpeechRecognition API");

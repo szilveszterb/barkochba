@@ -11,6 +11,7 @@
             this._recognition.continuous = true;
             this._recognition.interimResults = true;
             this._recognition.lang = "en-US";
+            // this._recognition.lang = "hu-HU";
             this._recognition.onresult = e => this._handleResult(e);
         }
         _handleResult(e) {
