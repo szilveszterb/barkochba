@@ -58,9 +58,16 @@
         document.getElementById("io-answer-img").src = imgUrl;
     }
 
+    function showWebspeechResult(text) {
+        document.getElementById("stt-output").value = text;
+    }
+
     function _init() {
         document.getElementById("stt-start").addEventListener("click", () => {
-            _fire(UI.onStartListeningClicked);
+            _fire(UI.onWebspeechStartListeningClicked);
+        });
+        document.getElementById("stt-stop").addEventListener("click", () => {
+            _fire(UI.onWebspeechStopListeningClicked);
         });
     }
 
@@ -86,6 +93,9 @@
         showAnswers, showQuestion,
         onAnswerClicked: null,
         //webkit stt
-        onStartListeningClicked: null,
+        showWebspeechResult,
+        onWebspeechStartListeningClicked: null,
+        onWebspeechStopListeningClicked: null,
+
     };
 })();

@@ -3,6 +3,9 @@
 
     try {
         listener = new Speech2Text();
+        listener.onResult = e => {
+            UI.showWebspeechResult(JSON.stringify(e.results));
+        };
     } catch (e) {
         UI.showError("Your browser does not support WebSpeechRecognition API");
         console.error(e);
@@ -16,8 +19,11 @@
     }
 
 
-    UI.onStartListeningClicked = () => {
+    UI.onWebspeechStartListeningClicked = () => {
         listener.start();
+    };
+    UI.onWebspeechStopListeningClicked = () => {
+        listener.stop();
     };
 
     UI.onAnswerClicked = id => {
