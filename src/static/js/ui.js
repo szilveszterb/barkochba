@@ -90,7 +90,7 @@
         // general ui
         showError, showWarning, showUnknownError, clearAlerts,
         // akinator
-        showAnswers, showQuestion,
+        showAnswers, showQuestion, showFoundAnswer,
         onAnswerClicked: null,
         //webkit stt
         showWebspeechResult,
