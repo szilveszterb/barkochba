@@ -1,12 +1,15 @@
 (function(){
-    var speaker = null, listener = null, akinator = null;
+    self.RTAD = {};
+    RTAD.speaker = null;
+    RTAD.listener  = null;
+    RTAD.akinator = null;
 
     function toArray(arrayLike) {
         return Array.prototype.slice.call(arrayLike, 0);
     }
     try {
-        listener = new Speech2Text();
-        listener.onResult = e => {
+        RTAD.listener = new Speech2Text();
+        RTAD.listener.onResult = e => {
             const jsonResult = toArray(e.results).map(result => ({
                 alternatives: toArray(result).map(alt => ({
                     transcript: alt.transcript,
@@ -22,7 +25,7 @@
     }
 
     try {
-        speaker = new Text2Speech();
+        RTAD.speaker = new Text2Speech();
     } catch (e) {
         UI.showError("Your browser does not support WebSpeechSynthesis API");
         console.error(e);
@@ -30,18 +33,18 @@
 
 
     UI.onWebspeechStartListeningClicked = () => {
-        listener.start();
+        RTAD.listener.start();
     };
     UI.onWebspeechStopListeningClicked = () => {
-        listener.stop();
+        RTAD.listener.stop();
     };
 
     UI.onAnswerClicked = id => {
-        akinator.sendAnswer(id);
+        RTAD.akinator.sendAnswer(id);
     };
 
     try {
-        akinator = new Akinator({
+        RTAD.akinator = new Akinator({
             onAsk(x) {
                 UI.showQuestion(x.question.text);
                 UI.showAnswers(x.answers);
@@ -57,7 +60,7 @@
                 console.error(e);
             }
         });
-        akinator.hello();
+        RTAD.akinator.hello();
     } catch (e) {
         UI.showError("Couldn't initialize akinator engine");
         console.error(e);
