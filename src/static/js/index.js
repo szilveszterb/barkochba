@@ -1,3 +1,4 @@
+
 (function(){
     self.RTAD = {};
     RTAD.speaker = null;
@@ -15,7 +16,7 @@
                     transcript: alt.transcript,
                     confidence: alt.confidence
                 })),
-                isFinal: e.results.isFinal
+                isFinal: result.isFinal
             }));
             UI.showWebspeechResult(JSON.stringify(jsonResult));
         };

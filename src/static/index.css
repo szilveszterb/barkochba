@@ -1,3 +1,50 @@
 body {
     padding-top: 20px;
 }
+
+.browser-support {
+    float: right;
+}
+
+.sentence {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 100%;
+    height: 60px;
+}
+
+.sentence .confidence {
+    font-size: 50%;
+}
+
+.sentence.ng-animate {
+    transition: 0.5s ease all;
+}
+
+.sentence.ng-enter:not(.ng-enter-active),
+.sentence.ng-leave-active {
+    font-size: 0;
+    opacity: 0;
+    height: 0;
+}
+
+.sentence-last {
+    font-size: 150%;
+}
+
+.microphone-container {
+    position: relative;
+}
+
+.microphone {
+    position: absolute;
+    right: 0;
+}
+
+.speaker-container {
+    font-size: 65%;
+}
+
+.ng-cloak {
+    display: none !important;
+}

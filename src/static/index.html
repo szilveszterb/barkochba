@@ -8,174 +8,84 @@
     <link rel="stylesheet" href="index.css">
 </head>
 
-<body>
-    <div class="container">
+<body ng-app="App" ng-controller="AppController">
+    <div class="container ng-cloak">
         <nav class="navbar navbar-default">
           <div class="container-fluid">
             <div class="navbar-header">
-              <a class="navbar-brand" href="#">RTAD</a>
+              <a class="navbar-brand" href="#">Red Team AI Demo</a>
             </div>
           </div>
         </nav>
+        <div id="browser-support-container">
+            <span class="label label-success browser-support">Your browser is supported!</span>
+            <span class="label label-warning browser-support">Your browser might not be supported!</span>
+            <span class="label label-danger browser-support">Your browser is not supported!</span>
+        </div>
 
-        <h1>Hello World</h1>
+        <h1>Guessing Game</h1>
 
         <div id="ui-alerts"></div>
 
         <div class="panel panel-default">
-            <div class="panel-heading">Text to speech</div>
+            <div class="panel-heading">What do I hear?</div>
             <div class="panel-body">
-                <input type="text" id="text2speech" value="United States of America">
-                <button id="talk">Talk please</button>
+                <div class="microphone-container">
+                    <img class="microphone" ng-src="{{isListening() ? 'img/mic-animate.gif' : 'img/mic.gif'}}" ng-click="micClick()">
+                </div>
+                <div>
+                    <div ng-repeat="msg in heardList track by msg.id">
+                        <div class="sentence" ng-class="msg.isFinal?'':'sentence-last'">
+                            {{msg.transcript}}
+                            <span class="confidence">({{ msg.confidence*100 | number:1 }}%
+                                <span ng-if="msg.interpretation">, interpreted as: {{ msg.interpretation }}</span>)
+                            </span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
         <div class="panel panel-default">
-            <div class="panel-heading">Speech to text</div>
+            <div class="panel-heading">What did I say?</div>
             <div class="panel-body">
-
-                <div>
-                    <h3>Google Cloud Speech</h3>
-
-                    <button type="button" id="speech_demo_record_button">Click to record!</button><br>
-                    <button type="button" id="speech_demo_reload">Reload</button>
-                    <div id="speech_demo_record_processing"></div>
-                    <div id="speech_demo_record_timer"></div>
-                    <div id="speech_demo_section"></div>
-                    <div id="speech_demo_results_container"></div>
-                    <div id="speech_demo_results"></div>
-                    <div id="speech_demo_results_code"></div>
-                    <div id="speech_demo_captcha_container"></div>
-                    <div id="speech_demo_error_container"></div>
-                    <div id="speech_demo_unavailable"></div>
-                    <br>
-                    Select Language: <select id="speech_demo_record_language" name="speech_demo_record_language">
-                                    <option value="af-ZA">Afrikaans (Suid-Afrika)</option>
-                                    <option value="id-ID">Bahasa Indonesia (Indonesia)</option>
-                                    <option value="ms-MY">Bahasa Melayu (Malaysia)</option>
-                                    <option value="ca-ES">Català (Espanya)</option>
-                                    <option value="cs-CZ">Čeština (Česká republika)</option>
-                                    <option value="da-DK">Dansk (Danmark)</option>
-                                    <option value="de-DE">Deutsch (Deutschland)</option>
-                                    <option value="en-AU">English (Australia)</option>
-                                    <option value="en-CA">English (Canada)</option>
-                                    <option value="en-GB">English (Great Britain)</option>
-                                    <option value="en-IN">English (India)</option>
-                                    <option value="en-IE">English (Ireland)</option>
-                                    <option value="en-NZ">English (New Zealand)</option>
-                                    <option value="en-PH">English (Philippines)</option>
-                                    <option value="en-ZA">English (South Africa)</option>
-                                    <option value="en-US" selected="selected">English (United States)</option>
-                                    <option value="es-AR">Español (Argentina)</option>
-                                    <option value="es-BO">Español (Bolivia)</option>
-                                    <option value="es-CL">Español (Chile)</option>
-                                    <option value="es-CO">Español (Colombia)</option>
-                                    <option value="es-CR">Español (Costa Rica)</option>
-                                    <option value="es-EC">Español (Ecuador)</option>
-                                    <option value="es-SV">Español (El Salvador)</option>
-                                    <option value="es-ES">Español (España)</option>
-                                    <option value="es-US">Español (Estados Unidos)</option>
-                                    <option value="es-GT">Español (Guatemala)</option>
-                                    <option value="es-HN">Español (Honduras)</option>
-                                    <option value="es-MX">Español (México)</option>
-                                    <option value="es-NI">Español (Nicaragua)</option>
-                                    <option value="es-PA">Español (Panamá)</option>
-                                    <option value="es-PY">Español (Paraguay)</option>
-                                    <option value="es-PE">Español (Perú)</option>
-                                    <option value="es-PR">Español (Puerto Rico)</option>
-                                    <option value="es-DO">Español (República Dominicana)</option>
-                                    <option value="es-UY">Español (Uruguay)</option>
-                                    <option value="es-VE">Español (Venezuela)</option>
-                                    <option value="eu-ES">Euskara (Espainia)</option>
-                                    <option value="fil-PH">Filipino (Pilipinas)</option>
-                                    <option value="fr-FR">Français (France)</option>
-                                    <option value="gl-ES">Galego (España)</option>
-                                    <option value="hr-HR">Hrvatski (Hrvatska)</option>
-                                    <option value="zu-ZA">IsiZulu (Ningizimu Afrika)</option>
-                                    <option value="is-IS">Íslenska (Ísland)</option>
-                                    <option value="it-IT">Italiano (Italia)</option>
-                                    <option value="lt-LT">Lietuvių (Lietuva)</option>
-                                    <option value="hu-HU">Magyar (Magyarország)</option>
-                                    <option value="nl-NL">Nederlands (Nederland)</option>
-                                    <option value="nb-NO">Norsk bokmål (Norge)</option>
-                                    <option value="pl-PL">Polski (Polska)</option>
-                                    <option value="pt-BR">Português (Brasil)</option>
-                                    <option value="pt-PT">Português (Portugal)</option>
-                                    <option value="ro-RO">Română (România)</option>
-                                    <option value="sk-SK">Slovenčina (Slovensko)</option>
-                                    <option value="sl-SI">Slovenščina (Slovenija)</option>
-                                    <option value="fi-FI">Suomi (Suomi)</option>
-                                    <option value="sv-SE">Svenska (Sverige)</option>
-                                    <option value="vi-VN">Tiếng Việt (Việt Nam)</option>
-                                    <option value="tr-TR">Türkçe (Türkiye)</option>
-                                    <option value="el-GR">Ελληνικά (Ελλάδα)</option>
-                                    <option value="bg-BG">Български (България)</option>
-                                    <option value="ru-RU">Русский (Россия)</option>
-                                    <option value="sr-RS">Српски (Србија)</option>
-                                    <option value="uk-UA">Українська (Україна)</option>
-                                    <option value="he-IL">עברית (ישראל)</option>
-                                    <option value="ar-IL">العربية (إسرائيل)</option>
-                                    <option value="ar-JO">العربية (الأردن)</option>
-                                    <option value="ar-AE">العربية (الإمارات)</option>
-                                    <option value="ar-BH">العربية (البحرين)</option>
-                                    <option value="ar-DZ">العربية (الجزائر)</option>
-                                    <option value="ar-SA">العربية (السعودية)</option>
-                                    <option value="ar-IQ">العربية (العراق)</option>
-                                    <option value="ar-KW">العربية (الكويت)</option>
-                                    <option value="ar-MA">العربية (المغرب)</option>
-                                    <option value="ar-TN">العربية (تونس)</option>
-                                    <option value="ar-OM">العربية (عُمان)</option>
-                                    <option value="ar-PS">العربية (فلسطين)</option>
-                                    <option value="ar-QA">العربية (قطر)</option>
-                                    <option value="ar-LB">العربية (لبنان)</option>
-                                    <option value="ar-EG">العربية (مصر)</option>
-                                    <option value="fa-IR">فارسی (ایران)</option>
-                                    <option value="hi-IN">हिन्दी (भारत)</option>
-                                    <option value="th-TH">ไทย (ประเทศไทย)</option>
-                                    <option value="ko-KR">한국어 (대한민국)</option>
-                                    <option value="cmn-Hant-TW">國語 (台灣)</option>
-                                    <option value="yue-Hant-HK">廣東話 (香港)</option>
-                                    <option value="ja-JP">日本語（日本）</option>
-                                    <option value="cmn-Hans-HK">普通話 (香港)</option>
-                                    <option value="cmn-Hans-CN">普通话 (中国大陆)</option>
-                                  </select>
-                </div>
-
-                <div>
-                    <h3>webkitSpeechRecognition</h3>
-                    <div>
-                        <button id="stt-start">Start listening</button>
-                        <button id="stt-stop">Stop listening</button>
-                    </div>
-                    <div>
-                        <textarea id="stt-output"></textarea>
-                    </div>
+                <div ng-repeat="message in spokeList" class="sentence" ng-class="$last ? 'sentence-last' : ''">
+                    <span>{{message.text}}</span>
+                    <span class="speaker-container" ng-click="speak(message.text)">
+                        <span class="glyphicon glyphicon-volume-up" alt="Press to speak again"></span>
+                    </span>
                 </div>
             </div>
         </div>
 
         <div class="panel panel-default">
-            <div class="panel-heading">Game engine</div>
+            <div class="panel-heading">Some expected answers</div>
             <div class="panel-body">
-                <button id="io-start">Start</button>
-                <div>Question</div>
-                <div id="io-question"></div>
-                <div><img id="io-answer-img"></div>
-                <div>answers</div>
-                <div>
-                    <ul id="io-answers"></ul>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul>
+                            <li ng-repeat="answer in expectedAnswers">{{answer.id}}) {{answer.text}}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <div ng-if="guess">
+                            <div>My guess is:</div>
+                            <h3>{{guess.text}}</h3>
+                            <img ng-src="{{guess.imageUrl}}">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="angular/angular.js"></script>
+    <script src="angular/angular-animate.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/stt/recorder.js"></script>
-    <script src="js/stt/stt-gcloud.js"></script>
     <script src="js/stt/stt-webspeech.js"></script>
     <script src="js/game-engine.js"></script>
     <script src="js/text2speech.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/index.js"></script>
-
+    <script src="js/utils.js"></script>
 </body>
 </html>
