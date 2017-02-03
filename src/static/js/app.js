@@ -1,7 +1,14 @@
 angular.module("App", [
     "ngAnimate"
-]).controller("AppController", function(
+])
+.constant("SUPPORT_LEVEL", {
+    Supported: "Supported",
+    NotTested: "NotTested",
+    NotSupported: "NotSupported"
+})
+.controller("AppController", function(
     $scope, $log, $timeout,
+    SUPPORT_LEVEL,
     Text2Speech, Speech2Text, Akinator,
     utils
 ) {
@@ -22,6 +29,9 @@ angular.module("App", [
     $scope.guess /* :{text:string, imageUrl:string} */ = null;
 
     $scope.expectedAnswers = [];
+
+    // TODO: determine support level
+    $scope.supportLevel = SUPPORT_LEVEL.NotTested;
 
     function answer_yes(action) {
         return { id:"A", text:"Yes", alts: ["yes", "sure", "of course", "why not", "start"], action };

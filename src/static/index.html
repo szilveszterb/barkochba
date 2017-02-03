@@ -18,9 +18,9 @@
           </div>
         </nav>
         <div id="browser-support-container">
-            <span class="label label-success browser-support">Your browser is supported!</span>
-            <span class="label label-warning browser-support">Your browser might not be supported!</span>
-            <span class="label label-danger browser-support">Your browser is not supported!</span>
+            <span class="label label-success browser-support" ng-if="supportLevel=='Supported'">Your browser is supported!</span>
+            <span class="label label-warning browser-support" ng-if="supportLevel=='NotTested'">Your browser might not be supported!</span>
+            <span class="label label-danger browser-support" ng-if="supportLevel=='NotSupported'">Your browser is not supported!</span>
         </div>
 
         <h1>Guessing Game</h1>
