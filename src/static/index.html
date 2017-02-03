@@ -31,17 +31,14 @@
             <div class="panel-heading">What do I hear?</div>
             <div class="panel-body">
                 <div class="microphone-container">
-                    <img class="microphone" ng-src="{{isListening() ? 'img/mic-animate.gif' : 'img/mic.gif'}}" ng-click="micClick()">
+                    <img class="microphone" ng-src="{{isListening() ? 'img/mic-animate.gif' : 'img/mic.gif'}}" ng-click="toggleMic()">
                 </div>
-                <div>
-                    <div ng-repeat="msg in heardList track by msg.id">
-                        <div class="sentence" ng-class="msg.isFinal?'':'sentence-last'">
-                            {{msg.transcript}}
-                            <span class="confidence">({{ msg.confidence*100 | number:1 }}%
-                                <span ng-if="msg.interpretation">, interpreted as: {{ msg.interpretation }}</span>)
-                            </span>
-                            <span></span>
-                        </div>
+                <div class="sentence-container">
+                    <div ng-repeat="msg in heardList track by msg.id" class="sentence" ng-class="msg.isFinal ? '' : 'sentence-last'">
+                        <span>{{msg.transcript}}</span>
+                        <span class="confidence">({{ msg.confidence*100 | number:1 }}%
+                            <span ng-if="msg.interpretation">, interpreted as: {{ msg.interpretation }}</span>)
+                        </span>
                     </div>
                 </div>
             </div>
@@ -49,11 +46,13 @@
         <div class="panel panel-default">
             <div class="panel-heading">What did I say?</div>
             <div class="panel-body">
-                <div ng-repeat="message in spokeList" class="sentence" ng-class="$last ? 'sentence-last' : ''">
-                    <span>{{message.text}}</span>
-                    <span class="speaker-container" ng-click="speak(message.text)">
-                        <span class="glyphicon glyphicon-volume-up" alt="Press to speak again"></span>
-                    </span>
+                <div class="sentence-container">
+                    <div ng-repeat="message in spokeList" class="sentence" ng-class="$last ? 'sentence-last' : ''">
+                        <span>{{message.text}}</span>
+                        <span class="speaker-container" ng-click="repeatMessage(message)">
+                            <span class="glyphicon glyphicon-volume-up" alt="Press to speak again"></span>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,9 +62,11 @@
             <div class="panel-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <ul>
-                            <li ng-repeat="answer in expectedAnswers">{{answer.id}}) {{answer.text}}</li>
-                        </ul>
+                        <div ng-repeat="answer in expectedAnswers">
+                            <button class="answer-option" ng-click="selectAnswer(answer)">
+                                {{answer.id}}) {{answer.text}}
+                            </button>
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <div ng-if="guess">

@@ -49,7 +49,7 @@ angular.module("App", [
                         return {
                             id: myId,
                             text: akiAns.text,
-                            alts: [akiAns.text].map(x => (""+x).toLowerCase()),
+                            alts: [akiAns.text],
                             action: () => {
                                 akinator.sendAnswer(akiAns.id);
                             },
@@ -115,15 +115,16 @@ angular.module("App", [
         const bestRatedAnswer = rated[0];
         if (bestRatedAnswer) {
             heard.interpretation = bestRatedAnswer.answer.text;
-            handleAnswer(bestRatedAnswer.answer);
+            $scope.selectAnswer(bestRatedAnswer.answer);
         } else {
             heard.interpretation = "?";
         }
     }
 
-    function handleAnswer(answer) {
+    $scope.selectAnswer = answer => {
         answer.action();
-    }
+    };
+
 
     function ShownHeardItem() {
         this.id = null;
@@ -162,8 +163,8 @@ angular.module("App", [
         return !!(_listener && _listener.listening);
     };
 
-    $scope.speak = function(text) {
-        _speaker.speak(text);
+    $scope.repeatMessage = function(msg) {
+        _speaker.speak(msg.text);
     };
 
     $scope.addMessage = function(text) {
@@ -171,10 +172,10 @@ angular.module("App", [
         while ($scope.spokeList.length > SPEAKER_HISTORY_LENGTH) {
             $scope.spokeList.shift();
         }
-        $scope.speak(text);
+        _speaker.speak(text);
     };
 
-    $scope.micClick = function() {
+    $scope.toggleMic = function() {
         if (_listener.listening) {
             _listener.stop();
         } else {

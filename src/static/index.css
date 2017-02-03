@@ -6,15 +6,19 @@ body {
     float: right;
 }
 
+.sentence-container {
+    height: 90px;
+}
+
 .sentence {
     text-align: center;
     vertical-align: middle;
     font-size: 100%;
-    height: 60px;
+    height: 45px;
 }
 
 .sentence .confidence {
-    font-size: 50%;
+    font-size: 60%;
 }
 
 .sentence.ng-animate {
@@ -29,7 +33,7 @@ body {
 }
 
 .sentence-last {
-    font-size: 150%;
+    font-size: 180%;
 }
 
 .microphone-container {
@@ -39,6 +43,12 @@ body {
 .microphone {
     position: absolute;
     right: 0;
+}
+
+.answer-option {
+    background: none;
+    border: none;
+    text-decoration: underline;
 }
 
 .speaker-container {
