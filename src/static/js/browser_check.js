@@ -1,0 +1,37 @@
+angular.module('App').factory('BrowserChecker', function($log, SUPPORT_LEVEL){
+    function get_browser() {
+        var ua=navigator.userAgent,tem,M=ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+        if(/trident/i.test(M[1])){
+            tem=/\brv[ :]+(\d+)/g.exec(ua) || [];
+            return {name:'IE',version:(parseInt(tem[1])||'')};
+            }
+        if(M[1]==='Chrome'){
+            tem=ua.match(/\bOPR|Edge\/(\d+)/)
+            if(tem!=null)   {return {name:'Opera', version:parseInt(tem[1])};}
+            }
+        M=M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+        if((tem=ua.match(/version\/(\d+)/i))!=null) {M.splice(1,1,tem[1]);}
+        return {
+          name: M[0],
+          version: parseInt(M[1])
+        };
+     }
+    function get_support() {
+        try {
+            var browser = get_browser();
+            if (browser.name != "Chrome") {
+                return SUPPORT_LEVEL.NotSupported;
+            }
+            if (browser.version < 56) {
+                return SUPPORT_LEVEL.NotTested;
+            }
+            else {
+                return SUPPORT_LEVEL.Supported;
+            }
+        } catch (e) {
+            $log.error(e);
+            return SUPPORT_LEVEL.NotTested;
+        }
+    }
+    return {get_browser, get_support };
+});

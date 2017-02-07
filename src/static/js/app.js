@@ -9,6 +9,7 @@ angular.module("App", [
 .controller("AppController", function(
     $scope, $log, $timeout,
     SUPPORT_LEVEL,
+    BrowserChecker,
     Text2Speech, Speech2Text, Akinator,
     utils
 ) {
@@ -30,8 +31,7 @@ angular.module("App", [
 
     $scope.expectedAnswers = [];
 
-    // TODO: determine support level
-    $scope.supportLevel = SUPPORT_LEVEL.NotTested;
+    $scope.supportLevel = BrowserChecker.get_support();
 
     function answer_yes(action) {
         return { id:"A", text:"Yes", alts: ["yes", "sure", "of course", "why not", "start"], action };
