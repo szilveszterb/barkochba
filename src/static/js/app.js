@@ -26,6 +26,9 @@ angular.module("App", [
         "Lorem ipsum dolor sit amet",
         "Lorem ipsum dolor sit amet",
     ].map((transcript, i)=>({transcript, confidence:0.99, isFinal: i<1, id:i}));
+    $scope.heardInterim = null;
+    $scope.shownHeardList = [];
+
 
     $scope.guess /* :{text:string, imageUrl:string} */ = null;
 
@@ -41,6 +44,17 @@ angular.module("App", [
     var _akinator = null;
     var _speaker = null;
     var _listener = null;
+
+    $scope.$watch("heardList", _updateShownHeardList);
+    $scope.$watch("heardInterim", _updateShownHeardList);
+
+    function _updateShownHeardList() {
+        $scope.shownHeardList = $scope.heardList.slice(-2);
+        if ($scope.heardInterim) {
+            $scope.shownHeardList.push($scope.heardInterim);
+        }
+        utils.retainLast($scope.shownHeardList, 2);
+    }
 
     function startGameAskToStart() {
         $scope.addMessage("Welcome Sir! Would you like to play a game?");
@@ -115,6 +129,7 @@ angular.module("App", [
 
     function handleHeardAnswer(heard) {
         const text = canonize(heard.transcript);
+        $log.log(text);
         var rated = $scope.expectedAnswers.map(answer => ({
             rating: rateAnswerMatch(answer, text),
             answer: answer
@@ -137,7 +152,6 @@ angular.module("App", [
 
 
     function ShownHeardItem() {
-        this.id = null;
         this.transcript = null;
         this.confidence = null;
         this.interpretation = null;
@@ -148,6 +162,7 @@ angular.module("App", [
         _speaker = new Text2Speech();
         _listener = new Speech2Text();
         _listener.onResult = _handleRecognitionResultEvent;
+        _listener.onInterim = _handleRecognitionInterimEvent;
 
         $timeout(() => {
             _listener.start();
@@ -156,18 +171,23 @@ angular.module("App", [
     }
 
     function _handleRecognitionResultEvent(e) {
-        utils.mergeListBy($scope.heardList, utils.map(e.results, (result, index) => ({
-            id: index,
-            transcript: result[0].transcript, // TODO: what about other alternatives?
-            confidence: result[0].confidence,
-            isFinal: result.isFinal
-        })).slice(-2), x=>x.id, ShownHeardItem);
-
-        const lastItem = utils.last($scope.heardList);
-        if (lastItem && lastItem.isFinal) {
-            handleHeardAnswer(lastItem);
-        }
+        const item = $scope.heardInterim || new ShownHeardItem();
+        item.transcript = e.transcript;
+        item.confidence = e.confidence;
+        item.isFinal = e.isFinal;
+        $scope.heardInterim = null;
+        $scope.heardList.push(item);
+        handleHeardAnswer(item);
     }
+
+    function _handleRecognitionInterimEvent(e) {
+        const item = $scope.heardInterim || new ShownHeardItem();
+        item.transcript = e.transcript;
+        item.confidence = e.confidence;
+        item.isFinal = e.isFinal;
+        $scope.heardInterim = item;
+    }
+
 
     $scope.isListening = function() {
         return !!(_listener && _listener.listening);

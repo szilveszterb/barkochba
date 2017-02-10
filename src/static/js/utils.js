@@ -64,9 +64,15 @@ angular.module("App").factory("utils", function() {
         return contains(" " + text + " ", " " + part + " ");
     }
 
+    function retainLast(arr, cnt) {
+        while (arr.length > cnt) {
+            arr.shift();
+        }
+    }
+
     return {
         contains, containsWord, compare, sortedBy,
         listAssign, toMapBy, mergeListBy,
-        toArray, last, map
+        toArray, last, map, retainLast
     };
 });
