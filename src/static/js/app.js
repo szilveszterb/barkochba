@@ -36,14 +36,39 @@ angular.module("App", [
 
     $scope.supportLevel = BrowserChecker.get_support();
 
-    function answer_yes(action) {
-        return { id:"A", text:"Yes", alts: ["yes", "sure", "of course", "why not", "start"], action };
-    }
-    const INITIAL_EXPECTED_ANSWER = answer_yes(startGuessing);
+    $scope.lastQuestion = null;
+
+    const INITIAL_EXPECTED_ANSWERS = [
+        { id:"A", text:"Yes", alts: ["yes", "sure", "of course", "why not", "start"], action: "startGame", param: 0 },
+    ];
+
+    const QUESTION_ADDITIONAL_ANSWERS = [
+        { id:"H", text:"Repeat", alts: ["didn't understand", "could you please repeat", "what"], action: "repeatQuestion", param: 0 },
+        { id:"I", text:"Restart", alts: [], action: "restartGame", param: 0 },
+    ];
 
     var _akinator = null;
     var _speaker = null;
     var _listener = null;
+
+    const ACTIONS = {
+        startGame() {
+            startGuessing();
+        },
+        answerQuestion(akiAns) {
+            _akinator.sendAnswer(akiAns.id);
+        },
+        restartGame() {
+            startGameAskToStart();
+        },
+        repeatQuestion() {
+            $scope.repeatQuestion();
+        }
+    };
+
+    function _executeAnswerAction(answer) {
+        ACTIONS[answer.action](answer.param);
+    }
 
     $scope.$watch("heardList", _updateShownHeardList);
     $scope.$watch("heardInterim", _updateShownHeardList);
@@ -56,30 +81,48 @@ angular.module("App", [
         utils.retainLast($scope.shownHeardList, 2);
     }
 
+    function showExpectedAnswers(answers, kind) {
+        if (kind === "game") {
+            answers = answers.concat(QUESTION_ADDITIONAL_ANSWERS);
+        }
+        $scope.expectedAnswers = answers;
+    }
+
     function startGameAskToStart() {
         $scope.addMessage("Welcome Sir! Would you like to play a game?");
-        $scope.expectedAnswers = [INITIAL_EXPECTED_ANSWER];
+        showExpectedAnswers(INITIAL_EXPECTED_ANSWERS, "menu");
     }
+
+    function _askQuestionWithAnswers(ask) {
+        $scope.addMessage(ask.question.text);
+        var newExpectedAnswers = ask.answers.map((akiAns, i) => {
+            const myId = IDS.charAt(i);
+            return {
+                id: myId,
+                text: akiAns.text,
+                alts: [akiAns.text],
+                action: "answerQuestion",
+                param: akiAns,
+            };
+        });
+        showExpectedAnswers(newExpectedAnswers, "game");
+    }
+
+    $scope.repeatQuestion = function() {
+        if ($scope.lastQuestion) {
+            _askQuestionWithAnswers($scope.lastQuestion);
+        }
+    };
 
     function createAkinator() {
         var akinator = new Akinator({
             onAsk(ask) {
                 if (ask.last) {
                     // TODO
+                    showExpectedAnswers([], "final");
                 } else {
-                    $scope.addMessage(ask.question.text);
-                    $scope.expectedAnswers = ask.answers.map((akiAns, i) => {
-                        const myId = IDS.charAt(i);
-                        return {
-                            id: myId,
-                            text: akiAns.text,
-                            alts: [akiAns.text],
-                            action: () => {
-                                akinator.sendAnswer(akiAns.id);
-                            },
-                            _akinatorAnswer: akiAns
-                        };
-                    });
+                    $scope.lastQuestion = ask;
+                    _askQuestionWithAnswers(ask);
                 }
             },
 
@@ -143,11 +186,13 @@ angular.module("App", [
             $scope.selectAnswer(bestRatedAnswer.answer);
         } else {
             heard.interpretation = "?";
+            $scope.askUnrecognized();
         }
     }
 
     $scope.selectAnswer = answer => {
-        answer.action();
+        $scope.expectedAnswers = [];
+        _executeAnswerAction(answer);
     };
 
 
@@ -195,6 +240,10 @@ angular.module("App", [
 
     $scope.repeatMessage = function(msg) {
         _speaker.speak(msg.text);
+    };
+
+    $scope.askUnrecognized = function() {
+        $scope.addMessage("Sorry, I didn't understand. Could you please rephrase?");
     };
 
     $scope.addMessage = function(text) {

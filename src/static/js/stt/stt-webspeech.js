@@ -81,9 +81,11 @@ angular.module("App").factory("Speech2Text", function(
             };
         }
 
-        _fire(evt, ...args) {
-            if (this[evt]) {
-                this[evt](...args);
+        _fire(evt/*, ...args*/) {
+            var args = Array.prototype.slice.call(arguments, 1);
+            var handler = this[evt];
+            if (handler) {
+                handler.apply(null, args);
             }
         }
         _start() {
