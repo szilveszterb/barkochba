@@ -31,7 +31,7 @@
             <div class="panel-heading">What do I hear?</div>
             <div class="panel-body">
                 <div class="microphone-container">
-                    <img class="microphone" ng-src="{{isListening() ? 'img/mic-animate.gif' : 'img/mic.gif'}}" ng-click="toggleMic()">
+                    <img class="microphone" ng-src="{{isListening() ? 'img/mic-animate.gif' : 'img/mic_off.gif'}}" ng-click="toggleMic()">
                 </div>
                 <div class="sentence-container">
                     <div ng-repeat="msg in heardList track by msg.id" class="sentence" ng-class="msg.isFinal ? '' : 'sentence-last'">
