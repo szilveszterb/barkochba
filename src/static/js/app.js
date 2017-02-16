@@ -26,6 +26,9 @@ angular.module("App", [
         "Lorem ipsum dolor sit amet",
         "Lorem ipsum dolor sit amet",
     ].map((transcript, i)=>({transcript, confidence:0.99, isFinal: i<1, id:i}));
+    $scope.heardInterim = null;
+    $scope.shownHeardList = [];
+
 
     $scope.guess /* :{text:string, imageUrl:string} */ = null;
 
@@ -33,39 +36,93 @@ angular.module("App", [
 
     $scope.supportLevel = BrowserChecker.get_support();
 
-    function answer_yes(action) {
-        return { id:"A", text:"Yes", alts: ["yes", "sure", "of course", "why not", "start"], action };
-    }
-    const INITIAL_EXPECTED_ANSWER = answer_yes(startGuessing);
+    $scope.lastQuestion = null;
+
+    const INITIAL_EXPECTED_ANSWERS = [
+        { id:"A", text:"Yes", alts: ["yes", "sure", "of course", "why not", "start"], action: "startGame", param: 0 },
+    ];
+
+    const QUESTION_ADDITIONAL_ANSWERS = [
+        { id:"H", text:"Repeat", alts: ["didn't understand", "could you please repeat", "what"], action: "repeatQuestion", param: 0 },
+        { id:"I", text:"Restart", alts: [], action: "restartGame", param: 0 },
+    ];
 
     var _akinator = null;
     var _speaker = null;
     var _listener = null;
 
+    const ACTIONS = {
+        startGame() {
+            startGuessing();
+        },
+        answerQuestion(akiAns) {
+            _akinator.sendAnswer(akiAns.id);
+        },
+        restartGame() {
+            startGameAskToStart();
+        },
+        repeatQuestion() {
+            $scope.repeatQuestion();
+        }
+    };
+
+    function _executeAnswerAction(answer) {
+        ACTIONS[answer.action](answer.param);
+    }
+
+    $scope.$watch("heardList", _updateShownHeardList);
+    $scope.$watch("heardInterim", _updateShownHeardList);
+
+    function _updateShownHeardList() {
+        $scope.shownHeardList = $scope.heardList.slice(-2);
+        if ($scope.heardInterim) {
+            $scope.shownHeardList.push($scope.heardInterim);
+        }
+        utils.retainLast($scope.shownHeardList, 2);
+    }
+
+    function showExpectedAnswers(answers, kind) {
+        if (kind === "game") {
+            answers = answers.concat(QUESTION_ADDITIONAL_ANSWERS);
+        }
+        $scope.expectedAnswers = answers;
+    }
+
     function startGameAskToStart() {
         $scope.addMessage("Welcome Sir! Would you like to play a game?");
-        $scope.expectedAnswers = [INITIAL_EXPECTED_ANSWER];
+        showExpectedAnswers(INITIAL_EXPECTED_ANSWERS, "menu");
     }
+
+    function _askQuestionWithAnswers(ask) {
+        $scope.addMessage(ask.question.text);
+        var newExpectedAnswers = ask.answers.map((akiAns, i) => {
+            const myId = IDS.charAt(i);
+            return {
+                id: myId,
+                text: akiAns.text,
+                alts: [akiAns.text],
+                action: "answerQuestion",
+                param: akiAns,
+            };
+        });
+        showExpectedAnswers(newExpectedAnswers, "game");
+    }
+
+    $scope.repeatQuestion = function() {
+        if ($scope.lastQuestion) {
+            _askQuestionWithAnswers($scope.lastQuestion);
+        }
+    };
 
     function createAkinator() {
         var akinator = new Akinator({
             onAsk(ask) {
                 if (ask.last) {
                     // TODO
+                    showExpectedAnswers([], "final");
                 } else {
-                    $scope.addMessage(ask.question.text);
-                    $scope.expectedAnswers = ask.answers.map((akiAns, i) => {
-                        const myId = IDS.charAt(i);
-                        return {
-                            id: myId,
-                            text: akiAns.text,
-                            alts: [akiAns.text],
-                            action: () => {
-                                akinator.sendAnswer(akiAns.id);
-                            },
-                            _akinatorAnswer: akiAns
-                        };
-                    });
+                    $scope.lastQuestion = ask;
+                    _askQuestionWithAnswers(ask);
                 }
             },
 
@@ -115,6 +172,7 @@ angular.module("App", [
 
     function handleHeardAnswer(heard) {
         const text = canonize(heard.transcript);
+        $log.log(text);
         var rated = $scope.expectedAnswers.map(answer => ({
             rating: rateAnswerMatch(answer, text),
             answer: answer
@@ -128,16 +186,17 @@ angular.module("App", [
             $scope.selectAnswer(bestRatedAnswer.answer);
         } else {
             heard.interpretation = "?";
+            $scope.askUnrecognized();
         }
     }
 
     $scope.selectAnswer = answer => {
-        answer.action();
+        $scope.expectedAnswers = [];
+        _executeAnswerAction(answer);
     };
 
 
     function ShownHeardItem() {
-        this.id = null;
         this.transcript = null;
         this.confidence = null;
         this.interpretation = null;
@@ -148,6 +207,7 @@ angular.module("App", [
         _speaker = new Text2Speech();
         _listener = new Speech2Text();
         _listener.onResult = _handleRecognitionResultEvent;
+        _listener.onInterim = _handleRecognitionInterimEvent;
 
         $timeout(() => {
             _listener.start();
@@ -156,18 +216,23 @@ angular.module("App", [
     }
 
     function _handleRecognitionResultEvent(e) {
-        utils.mergeListBy($scope.heardList, utils.map(e.results, (result, index) => ({
-            id: index,
-            transcript: result[0].transcript, // TODO: what about other alternatives?
-            confidence: result[0].confidence,
-            isFinal: result.isFinal
-        })).slice(-2), x=>x.id, ShownHeardItem);
-
-        const lastItem = utils.last($scope.heardList);
-        if (lastItem && lastItem.isFinal) {
-            handleHeardAnswer(lastItem);
-        }
+        const item = $scope.heardInterim || new ShownHeardItem();
+        item.transcript = e.transcript;
+        item.confidence = e.confidence;
+        item.isFinal = e.isFinal;
+        $scope.heardInterim = null;
+        $scope.heardList.push(item);
+        handleHeardAnswer(item);
     }
+
+    function _handleRecognitionInterimEvent(e) {
+        const item = $scope.heardInterim || new ShownHeardItem();
+        item.transcript = e.transcript;
+        item.confidence = e.confidence;
+        item.isFinal = e.isFinal;
+        $scope.heardInterim = item;
+    }
+
 
     $scope.isListening = function() {
         return !!(_listener && _listener.listening);
@@ -175,6 +240,10 @@ angular.module("App", [
 
     $scope.repeatMessage = function(msg) {
         _speaker.speak(msg.text);
+    };
+
+    $scope.askUnrecognized = function() {
+        $scope.addMessage("Sorry, I didn't understand. Could you please rephrase?");
     };
 
     $scope.addMessage = function(text) {

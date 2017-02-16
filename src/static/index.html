@@ -34,7 +34,7 @@
                     <img class="microphone" ng-src="{{isListening() ? 'img/mic-animate.gif' : 'img/mic_off.gif'}}" ng-click="toggleMic()">
                 </div>
                 <div class="sentence-container">
-                    <div ng-repeat="msg in heardList track by msg.id" class="sentence" ng-class="msg.isFinal ? '' : 'sentence-last'">
+                    <div ng-repeat="msg in shownHeardList track by $id(msg)" class="sentence" ng-class="msg.isFinal ? '' : 'sentence-last'">
                         <span>{{msg.transcript}}</span>
                         <span class="confidence">({{ msg.confidence*100 | number:1 }}%
                             <span ng-if="msg.interpretation">, interpreted as: {{ msg.interpretation }}</span>)
