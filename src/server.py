@@ -1,23 +1,18 @@
-from flask import Flask, redirect, send_from_directory
+from flask import Flask, redirect
 import os
 import argparse
 from flask import request, Response
 import requests
 
-app = Flask(__name__, static_url_path="")
+app = Flask(__name__,
+            static_url_path="",
+            static_folder="static")
 
 AKINATOR_API_BASE = "http://api-en4.akinator.com/"
 
-
-@app.route("/static/<path:path>")
-def serve_static(path):
-    return send_from_directory("static", path)
-
-
 @app.route("/")
-@app.route("/index")
-def redirect_index():
-    return redirect("/static/index.html")
+def root_index():
+    return app.send_static_file("index.html")
 
 
 @app.route("/api/aki/<path:path>")
