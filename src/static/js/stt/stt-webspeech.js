@@ -15,7 +15,7 @@ angular.module("App").factory("Speech2Text", function(
             this._recognition = null;
             this._settledCount = 0;
             this._recognition = new webkitSpeechRecognition();
-            this._recognition.continuous = true;
+            this._recognition.continuous = false;
             this._recognition.interimResults = true;
             this._recognition.lang = "en-US";
             // this._recognition.lang = "hu-HU";

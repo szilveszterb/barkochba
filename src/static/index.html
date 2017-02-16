@@ -31,7 +31,7 @@
             <div class="panel-heading">What do I hear?</div>
             <div class="panel-body">
                 <div class="microphone-container">
-                    <img class="microphone" ng-src="{{isListening() ? 'img/mic-animate.gif' : 'img/mic_off.gif'}}" ng-click="toggleMic()">
+                    <img class="microphone" ng-src="{{isListening() ? (isSpeaking() ? 'img/mic-animate.gif' : 'img/mic.gif') : 'img/mic_off.gif'}}" ng-click="toggleMic()">
                 </div>
                 <div class="sentence-container">
                     <div ng-repeat="msg in shownHeardList track by $id(msg)" class="sentence" ng-class="msg.isFinal ? '' : 'sentence-last'">
@@ -90,6 +90,5 @@
     <script src="js/utils.js"></script>
     <script src="js/browser_check.js"></script>
     <script src="js/classifier.js"></script>
-    <script src="js/timer.js"></script>
 </body>
 </html>

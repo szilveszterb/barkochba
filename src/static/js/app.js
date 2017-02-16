@@ -11,7 +11,7 @@ angular.module("App", [
     SUPPORT_LEVEL,
     BrowserChecker,
     Text2Speech, Speech2Text, Akinator,
-    TextClassifier, Timer,
+    TextClassifier,
     utils
 ) {
     const SPEAKER_HISTORY_LENGTH = 2;
@@ -61,12 +61,6 @@ angular.module("App", [
     var _speaker = null;
     var _listener = null;
 
-    const interimTimer = new Timer();
-    interimTimer.onTimer = () => {
-        $log.log("interim timeout");
-        $scope.heardInterim = null;
-    };
-
     const ACTIONS = {
         startGame() {
             clearAnswers();
@@ -101,9 +95,6 @@ angular.module("App", [
     function clearGuess() {
         $scope.guess = null;
     }
-
-    $scope.$watch("heardList", _updateShownHeardList);
-    $scope.$watch("heardInterim", _updateShownHeardList);
 
     function _updateShownHeardList() {
         $scope.shownHeardList = $scope.heardList.slice(-2);
@@ -252,39 +243,47 @@ angular.module("App", [
         }
     }
 
-    function setTimedInterim(interim) {
-        if (interim) {
-            interimTimer.start();
-        } else {
-            interimTimer.stop();
-        }
+    function _setHeardInterim(interim) {
         $scope.heardInterim = interim;
+        _updateShownHeardList();
     }
+
     function _handleRecognitionResultEvent(e) {
+        $log.log("_handleRecognitionResultEvent");
         const item = $scope.heardInterim || new ShownHeardItem();
         item.transcript = e.transcript;
         item.confidence = e.confidence;
         item.isFinal = e.isFinal;
-        setTimedInterim(null);
-        $scope.heardList.push(item);
+        _setHeardInterim(null);
+        addToHeardList(item);
         handleHeardAnswer(item);
     }
 
+    function addToHeardList(item) {
+        $scope.heardList.push(item);
+        _updateShownHeardList();
+    }
+
     function _handleRecognitionInterimEvent(e) {
+        $log.log("_handleRecognitionInterimEvent");
         if (e) {
             const item = $scope.heardInterim || new ShownHeardItem();
             item.transcript = e.transcript;
             item.confidence = e.confidence;
             item.isFinal = e.isFinal;
-            setTimedInterim(item);
+            _setHeardInterim(item);
         } else {
-            setTimedInterim(null);
+            _setHeardInterim(null);
         }
     }
 
 
     $scope.isListening = function() {
         return !!(_listener && _listener.listening);
+    };
+
+    $scope.isSpeaking = function() {
+        return !!(_listener && _listener.hasSpeech);
     };
 
     $scope.repeatMessage = function(msg) {
