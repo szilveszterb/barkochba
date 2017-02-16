@@ -70,9 +70,26 @@ angular.module("App").factory("utils", function() {
         }
     }
 
+    function maxBy(arr, selector, def) {
+        var bestItem = null;
+        var bestScore = null;
+        var bestFound = false;
+        arr.forEach(currentItem => {
+            var currentScore = selector(currentItem);
+            if (!bestFound || currentScore > bestScore) {
+                bestFound = true;
+                bestScore = currentScore;
+                bestItem = currentItem;
+            }
+        });
+        return bestFound ? bestItem : def;
+    }
+
+
     return {
         contains, containsWord, compare, sortedBy,
         listAssign, toMapBy, mergeListBy,
-        toArray, last, map, retainLast
+        toArray, last, map, retainLast,
+        maxBy
     };
 });

@@ -8,6 +8,9 @@ angular.module("App").factory("Speech2Text", function(
             this.onInterim = null;
 
             this.listening = false;
+            this.hasAudio = false;
+            this.hasSound = false;
+            this.hasSpeech = false;
 
             this._recognition = null;
             this._settledCount = 0;
@@ -19,10 +22,28 @@ angular.module("App").factory("Speech2Text", function(
             this._recognition.onresult = e => this._handleResult(e);
             this._recognition.onstart = e => this._handleRecognitionStart(e);
             this._recognition.onend = e => this._handleRecognitionEnd(e);
-            this._recognition.onaudiostart = e => $log.log("_recognition.onaudiostart");
-            this._recognition.onaudioend = e => $log.log("_recognition.onaudioend");
             this._recognition.onerror = e => { $log.log("_recognition.onerror"); $log.log(e); };
             this._running = false;
+
+            this._subscribeStatusEvents();
+        }
+
+        _subscribeStatusEvents() {
+            this._subscribeStatusEvent("onaudiostart", "hasAudio", true);
+            this._subscribeStatusEvent("onaudioend", "hasAudio", false);
+            this._subscribeStatusEvent("onsoundstart", "hasSound", true);
+            this._subscribeStatusEvent("onsoundend", "hasSound", false);
+            this._subscribeStatusEvent("onspeechstart", "hasSpeech", true);
+            this._subscribeStatusEvent("onspeechend", "hasSpeech", false);
+        }
+
+        _subscribeStatusEvent(eventName, fieldName, value) {
+            this._recognition[eventName] = e => {
+                $log.log("_recognition." + eventName);
+                $rootScope.$apply(() => {
+                    this[fieldName] = value;
+                });
+            };
         }
 
         _handleRecognitionStart(e) {
@@ -48,7 +69,7 @@ angular.module("App").factory("Speech2Text", function(
         }
 
         _handleResult(evt) {
-            console.log(evt);
+            $log.log("_recognition.onresult");
             $rootScope.$apply(() => {
                 for (;;) {
                     const item = evt.results[this._settledCount];
@@ -62,6 +83,14 @@ angular.module("App").factory("Speech2Text", function(
                 const lastItem = utils.last(evt.results);
                 if (lastItem && !lastItem.isFinal) {
                     this._fireInterim(lastItem);
+                } else {
+                    this._fireInterim(null);
+
+                    // Restart recognition sometime, trying to workaround unknown hangs
+                    if (evt.results.length >= 10) {
+                        $log.log("scheduled recognition restart");
+                        setTimeout(() => { this._restart(); }, 100);
+                    }
                 }
             });
         }
@@ -74,6 +103,9 @@ angular.module("App").factory("Speech2Text", function(
         }
 
         _recognitionResultToOutput(item) {
+            if (!item) {
+                return null;
+            }
             return {
                 transcript: item[0].transcript,
                 confidence: item[0].confidence,
