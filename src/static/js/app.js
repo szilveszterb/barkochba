@@ -128,7 +128,7 @@ angular.module("App", [
     }
 
     function startGameAskToStart() {
-        $scope.addMessage("Welcome Sir! Would you like to play a game?");
+        $scope.addMessage("Welcome! Would you like to play a game?");
         showExpectedAnswers(WELCOME_EXPECTED_ANSWERS, "welcome");
     }
 
