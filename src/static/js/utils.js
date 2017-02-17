@@ -92,4 +92,28 @@ angular.module("App").factory("utils", function() {
         toArray, last, map, retainLast,
         maxBy
     };
+}).factory("event", function(
+    $rootScope
+) {
+    function fireApply(owner, event/*, ...params*/) {
+        const params = Array.prototype.slice.call(arguments, 2);
+        const evt = owner[event];
+        if (evt) {
+            $rootScope.$apply(() => {
+                evt.apply(null, params);
+            });
+        }
+    }
+
+    function fire(owner, event/*, ...params*/) {
+        const params = Array.prototype.slice.call(arguments, 2);
+        const evt = owner[event];
+        if (evt) {
+            evt.apply(null, params);
+        }
+    }
+
+    return {
+        fireApply, fire
+    };
 });

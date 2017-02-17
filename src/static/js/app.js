@@ -57,6 +57,11 @@ angular.module("App", [
 
     $scope.lastQuestion = null;
 
+    $scope.listening = false;
+    $scope.synthesizing = false;
+
+
+
     var _akinator = null;
     var _speaker = null;
     var _listener = null;
@@ -230,16 +235,20 @@ angular.module("App", [
     function init() {
         try {
             _speaker = new Text2Speech();
+            _speaker.onSynthesisStateChange = speaking => { $scope.synthesizing = speaking; };
             _listener = new Speech2Text();
             _listener.onResult = _handleRecognitionResultEvent;
             _listener.onInterim = _handleRecognitionInterimEvent;
 
+            _setupDelayedListenerActivation();
+
             $timeout(() => {
-                _listener.start();
+                $scope.listening = true;
                 startGameAskToStart();
             }, 1000);
         } catch(e) {
             $scope.supportLevel = SUPPORT_LEVEL.NotSupported;
+            $log.error(e);
         }
     }
 
@@ -261,6 +270,7 @@ angular.module("App", [
 
     function addToHeardList(item) {
         $scope.heardList.push(item);
+        utils.retainLast($scope.heardList, 5);
         _updateShownHeardList();
     }
 
@@ -276,11 +286,6 @@ angular.module("App", [
             _setHeardInterim(null);
         }
     }
-
-
-    $scope.isListening = function() {
-        return !!(_listener && _listener.listening);
-    };
 
     $scope.isSpeaking = function() {
         return !!(_listener && _listener.hasSpeech);
@@ -305,12 +310,25 @@ angular.module("App", [
         _speaker.speak(text);
     };
 
-    $scope.toggleMic = function() {
-        if (_listener.listening) {
-            _listener.stop();
-        } else {
-            _listener.start();
+    function _setupDelayedListenerActivation() {
+        var listenerActiveObservable = new Rx.Subject();
+        $scope.$watchGroup(["listening", "synthesizing"], () => {
+            listenerActiveObservable.next($scope.listening && !$scope.synthesizing);
+        });
+        listenerActiveObservable
+          .switchMap(x => Rx.Observable.of(x).delay(x ? 0 : 100))
+          .subscribe(setListenerActive);
+    }
+
+    function setListenerActive(isActive) {
+        $log.log("setListenerActive("+isActive+")");
+        if (_listener) {
+            _listener.setListening(isActive);
         }
+    }
+
+    $scope.toggleMic = function() {
+        $scope.listening = !$scope.listening;
     };
 
     $timeout(init, 200);

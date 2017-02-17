@@ -1,6 +1,6 @@
 angular.module("App").factory("Speech2Text", function(
   $rootScope, $log,
-  utils
+  utils, event
 ) {
     class Speech2Text {
         constructor() {
@@ -19,6 +19,7 @@ angular.module("App").factory("Speech2Text", function(
             this._recognition.interimResults = true;
             this._recognition.lang = "en-US";
             // this._recognition.lang = "hu-HU";
+
             this._recognition.onresult = e => this._handleResult(e);
             this._recognition.onstart = e => this._handleRecognitionStart(e);
             this._recognition.onend = e => this._handleRecognitionEnd(e);
@@ -96,10 +97,10 @@ angular.module("App").factory("Speech2Text", function(
         }
 
         _fireInterim(item) {
-            this._fire("onInterim", this._recognitionResultToOutput(item));
+            event.fire(this, "onInterim", this._recognitionResultToOutput(item));
         }
         _fireResult(item) {
-            this._fire("onResult", this._recognitionResultToOutput(item));
+            event.fire(this, "onResult", this._recognitionResultToOutput(item));
         }
 
         _recognitionResultToOutput(item) {
@@ -113,13 +114,6 @@ angular.module("App").factory("Speech2Text", function(
             };
         }
 
-        _fire(evt/*, ...args*/) {
-            var args = Array.prototype.slice.call(arguments, 1);
-            var handler = this[evt];
-            if (handler) {
-                handler.apply(null, args);
-            }
-        }
         _start() {
             this._running = true;
             this._settledCount = 0;
@@ -135,6 +129,17 @@ angular.module("App").factory("Speech2Text", function(
         stop() {
             this.listening = false;
             this._stop();
+        }
+
+        setListening(newListening) {
+            newListening = !!newListening;
+            if (this.listening !== newListening) {
+                if (newListening) {
+                    this.start();
+                } else {
+                    this.stop();
+                }
+            }
         }
     }
 

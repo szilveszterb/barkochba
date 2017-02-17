@@ -1,10 +1,13 @@
-angular.module("App").factory("Text2Speech", function($log) {
+angular.module("App").factory("Text2Speech", function(
+    $log, event
+) {
   class Text2Speech {
 
     constructor() {
       this.lang = "en-US";
       this.voice = null;
       this._synthesis = window.speechSynthesis;
+      this.onSynthesisStateChange = null;
     }
 
     getVoices() {
@@ -25,8 +28,20 @@ angular.module("App").factory("Text2Speech", function($log) {
       msg.pitch = 1; //0 to 2
       msg.lang = this.lang;
       msg.onend = e => $log.log('Finished in ' + event.elapsedTime + ' seconds.');
-      msg.onerror = e => $log.log(e);
-      msg.onstart = e => $log.log("SpeechSynthesisUtterance.onstart");
+
+      msg.onerror = e => {
+        $log.log(e);
+        event.fireApply(this, "onSynthesisStateChange", false);
+      };
+      msg.onstart = e => {
+        $log.log("SpeechSynthesisUtterance.onstart");
+        event.fireApply(this, "onSynthesisStateChange", true);
+      };
+      msg.onend = e => {
+        $log.log("SpeechSynthesisUtterance.onend");
+        event.fireApply(this, "onSynthesisStateChange", false);
+      };
+
       msg.text = text;
       this._synthesis.speak(msg);
       console.log("Speaking");
