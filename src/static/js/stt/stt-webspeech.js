@@ -115,9 +115,9 @@ angular.module("App").factory("Speech2Text", function(
         }
 
         _start() {
+            this._recognition.start();
             this._running = true;
             this._settledCount = 0;
-            this._recognition.start();
         }
         _stop() {
             this._recognition.abort();

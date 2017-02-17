@@ -14,6 +14,7 @@ angular.module("App", [
     TextClassifier,
     utils
 ) {
+    const RECOGNITION_DELAY_AFTER_SYNTHESIS = 250;
     const SPEAKER_HISTORY_LENGTH = 2;
     const LISTENER_HISTORY_LENGTH = 2;
     const IDS = "ABCDEFGHIJKL";
@@ -201,8 +202,7 @@ angular.module("App", [
 
     function handleHeardAnswer(heard) {
         const text = TextClassifier.canonize(heard.transcript);
-        $log.log(text);
-
+        $log.log("handleHeardAnswer: " + text);
 
         function answerAlternatives(answer) {
             return [answer.id].concat(answer.alts);
@@ -235,6 +235,7 @@ angular.module("App", [
     function init() {
         try {
             _speaker = new Text2Speech();
+
             _speaker.onSynthesisStateChange = speaking => { $scope.synthesizing = speaking; };
             _listener = new Speech2Text();
             _listener.onResult = _handleRecognitionResultEvent;
@@ -287,7 +288,7 @@ angular.module("App", [
         }
     }
 
-    $scope.isSpeaking = function() {
+    $scope.hasSpeech = function() {
         return !!(_listener && _listener.hasSpeech);
     };
 
@@ -316,7 +317,7 @@ angular.module("App", [
             listenerActiveObservable.next($scope.listening && !$scope.synthesizing);
         });
         listenerActiveObservable
-          .switchMap(x => Rx.Observable.of(x).delay(x ? 0 : 100))
+          .switchMap(x => Rx.Observable.of(x).delay(x ? 0 : RECOGNITION_DELAY_AFTER_SYNTHESIS))
           .subscribe(setListenerActive);
     }
 
