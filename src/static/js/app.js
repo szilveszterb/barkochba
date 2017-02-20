@@ -14,7 +14,7 @@ angular.module("App", [
     TextClassifier,
     utils
 ) {
-    const RECOGNITION_DELAY_AFTER_SYNTHESIS = 250;
+    const RECOGNITION_DELAY_AFTER_SYNTHESIS = 100;
     const SPEAKER_HISTORY_LENGTH = 2;
     const LISTENER_HISTORY_LENGTH = 2;
     const IDS = "ABCDEFGHIJKL";

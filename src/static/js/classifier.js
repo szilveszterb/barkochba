@@ -5,7 +5,7 @@ angular.module("App").factory("TextClassifier", function(
         ["ok", "okay"],
         ["done", "i'm done"],
         ["yes", "yeah", "sure", "of course", "why not"],
-        ["no", "not", "no no", "no way", "nope"],
+        ["no", "not", "no no", "no way", "nope", "i don't think so"],
         ["probably", "maybe"],
         ["probably not", "maybe not"],
         ["don't know", "i don't know", "i have no idea"],
